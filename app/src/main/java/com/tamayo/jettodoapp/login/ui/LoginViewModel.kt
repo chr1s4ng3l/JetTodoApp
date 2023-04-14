@@ -7,6 +7,7 @@ import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.tamayo.jettodoapp.addtask.domain.AddTaskUseCase
+import com.tamayo.jettodoapp.addtask.domain.DeleteTaskUseCase
 import com.tamayo.jettodoapp.login.domain.LoginUseCase
 import com.tamayo.jettodoapp.addtask.domain.GetTaskUseCase
 import com.tamayo.jettodoapp.addtask.domain.UpdateTaskUseCase
@@ -22,6 +23,7 @@ import javax.inject.Inject
 class LoginViewModel @Inject constructor(
     private val loginUseCase: LoginUseCase,
     private val addTaskUseCase: AddTaskUseCase,
+    private val deleteTaskUseCase: DeleteTaskUseCase,
     private val updateTaskUseCase: UpdateTaskUseCase,
     getTaskUseCase: GetTaskUseCase
 ) : ViewModel() {
@@ -109,7 +111,10 @@ class LoginViewModel @Inject constructor(
     }
 
     fun onItemRemove(taskModel: TaskModel) {
+        viewModelScope.launch {
+            deleteTaskUseCase(taskModel)
 
+        }
     }
 
 

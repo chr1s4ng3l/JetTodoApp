@@ -1,9 +1,6 @@
 package com.tamayo.jettodoapp.addtask.data
 
-import androidx.room.Dao
-import androidx.room.Insert
-import androidx.room.Query
-import androidx.room.Update
+import androidx.room.*
 import kotlinx.coroutines.flow.Flow
 
 @Dao
@@ -17,5 +14,8 @@ interface TaskDao {
 
     @Update
     suspend fun updateTask(item: TaskEntity)
+
+    @Delete
+    suspend fun deleteTask(item: TaskEntity)
 
 }
