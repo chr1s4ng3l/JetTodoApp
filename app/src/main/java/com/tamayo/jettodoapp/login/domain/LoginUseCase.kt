@@ -1,4 +1,4 @@
-package com.tamayo.jetlogin.login.domain
+package com.tamayo.jettodoapp.login.domain
 
 import com.tamayo.jetlogin.login.data.LoginRepository
 import javax.inject.Inject
