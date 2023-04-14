@@ -6,16 +6,27 @@ import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.tamayo.jetlogin.login.domain.LoginUseCase
+import com.tamayo.jettodoapp.addtask.domain.AddTaskUseCase
+import com.tamayo.jettodoapp.login.domain.LoginUseCase
+import com.tamayo.jettodoapp.addtask.domain.GetTaskUseCase
+import com.tamayo.jettodoapp.addtask.ui.TaskUiState
+import com.tamayo.jettodoapp.addtask.ui.TaskUiState.Success
 import com.tamayo.jettodoapp.addtask.ui.model.TaskModel
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 @HiltViewModel
 class LoginViewModel @Inject constructor(
-    private val loginUseCase: LoginUseCase
-    ): ViewModel() {
+    private val loginUseCase: LoginUseCase,
+    private val addTaskUseCase: AddTaskUseCase,
+    getTaskUseCase: GetTaskUseCase
+) : ViewModel() {
+
+    val uiState: StateFlow<TaskUiState> = getTaskUseCase().map(::Success)
+        .catch { TaskUiState.Error(it) }
+        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), TaskUiState.Loading)
 
     private val _task = mutableStateListOf<TaskModel>()
     val task: List<TaskModel> = _task
@@ -37,9 +48,9 @@ class LoginViewModel @Inject constructor(
     val isLoading = MutableLiveData<Boolean>()
 
     fun onLoginChanged(email: String, password: String) {
-            _email.value = email
-            _password.value = password
-       isEnable.value = enableLogin(email, password)
+        _email.value = email
+        _password.value = password
+        isEnable.value = enableLogin(email, password)
     }
 
     fun onRegisterChanged(name: String, lastName: String, email: String, password: String) {
@@ -53,15 +64,21 @@ class LoginViewModel @Inject constructor(
     private fun enableLogin(email: String, password: String): Boolean =
         Patterns.EMAIL_ADDRESS.matcher(email).matches() && password.length > 6
 
-    private fun enableRegister(name: String, lastName: String, email: String, password: String): Boolean =
-        Patterns.EMAIL_ADDRESS.matcher(email).matches() && password.length > 6 && name.isNotEmpty() && lastName.isNotEmpty()
+    private fun enableRegister(
+        name: String,
+        lastName: String,
+        email: String,
+        password: String
+    ): Boolean =
+        Patterns.EMAIL_ADDRESS.matcher(email)
+            .matches() && password.length > 6 && name.isNotEmpty() && lastName.isNotEmpty()
 
 
-    fun unLoginSelected(){
+    fun unLoginSelected() {
         viewModelScope.launch {
             isLoading.value = true
             val result = loginUseCase(email.value!!, password.value!!)
-            if (result){
+            if (result) {
                 //Navigation
                 println("Christopher")
                 isLoading.value = false
@@ -77,6 +94,9 @@ class LoginViewModel @Inject constructor(
         showDialog.value = false
         _task.add(TaskModel(task = task))
 
+        viewModelScope.launch {
+            addTaskUseCase(TaskModel(task = task))
+        }
 
     }
 
