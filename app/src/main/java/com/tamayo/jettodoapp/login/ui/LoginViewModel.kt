@@ -9,6 +9,7 @@ import androidx.lifecycle.viewModelScope
 import com.tamayo.jettodoapp.addtask.domain.AddTaskUseCase
 import com.tamayo.jettodoapp.login.domain.LoginUseCase
 import com.tamayo.jettodoapp.addtask.domain.GetTaskUseCase
+import com.tamayo.jettodoapp.addtask.domain.UpdateTaskUseCase
 import com.tamayo.jettodoapp.addtask.ui.TaskUiState
 import com.tamayo.jettodoapp.addtask.ui.TaskUiState.Success
 import com.tamayo.jettodoapp.addtask.ui.model.TaskModel
@@ -21,15 +22,13 @@ import javax.inject.Inject
 class LoginViewModel @Inject constructor(
     private val loginUseCase: LoginUseCase,
     private val addTaskUseCase: AddTaskUseCase,
+    private val updateTaskUseCase: UpdateTaskUseCase,
     getTaskUseCase: GetTaskUseCase
 ) : ViewModel() {
 
     val uiState: StateFlow<TaskUiState> = getTaskUseCase().map(::Success)
         .catch { TaskUiState.Error(it) }
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), TaskUiState.Loading)
-
-    private val _task = mutableStateListOf<TaskModel>()
-    val task: List<TaskModel> = _task
 
     private val _name = MutableLiveData<String>()
     val name: LiveData<String> = _name
@@ -92,7 +91,6 @@ class LoginViewModel @Inject constructor(
 
     fun taskCreated(task: String) {
         showDialog.value = false
-        _task.add(TaskModel(task = task))
 
         viewModelScope.launch {
             addTaskUseCase(TaskModel(task = task))
@@ -105,17 +103,12 @@ class LoginViewModel @Inject constructor(
     }
 
     fun onCheckBox(taskModel: TaskModel) {
-
-        val index = _task.indexOf(taskModel)
-        _task[index] = _task[index].let {
-            it.copy(selected = !it.selected)
+        viewModelScope.launch {
+            updateTaskUseCase(taskModel.copy(selected = !taskModel.selected))
         }
-
     }
 
     fun onItemRemove(taskModel: TaskModel) {
-        val task = _task.find { it.id == taskModel.id }
-        _task.remove(task)
 
     }
 
