@@ -6,4 +6,6 @@ import androidx.room.RoomDatabase
 @Database(entities = [TaskEntity::class] , version = 1)
 abstract class EventsDatabase: RoomDatabase() {
     //Dao
+
+    abstract fun taskDao():TaskDao
 }
