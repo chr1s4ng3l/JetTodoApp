@@ -1,11 +1,13 @@
 package com.tamayo.jettodoapp.login.ui
 
 import android.util.Patterns
+import androidx.compose.runtime.mutableStateListOf
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.tamayo.jetlogin.login.domain.LoginUseCase
+import com.tamayo.jettodoapp.addtask.ui.model.TaskModel
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.launch
 import javax.inject.Inject
@@ -14,6 +16,9 @@ import javax.inject.Inject
 class LoginViewModel @Inject constructor(
     private val loginUseCase: LoginUseCase
     ): ViewModel() {
+
+    private val _task = mutableStateListOf<TaskModel>()
+    val task: List<TaskModel> = _task
 
     private val _name = MutableLiveData<String>()
     val name: LiveData<String> = _name
@@ -70,7 +75,8 @@ class LoginViewModel @Inject constructor(
 
     fun taskCreated(task: String) {
         showDialog.value = false
-        println("->> $task")
+        _task.add(TaskModel(task = task))
+
 
     }
 
@@ -78,5 +84,22 @@ class LoginViewModel @Inject constructor(
         showDialog.value = true
     }
 
+    fun onCheckBox(taskModel: TaskModel) {
 
-}
+        val index = _task.indexOf(taskModel)
+        _task[index] = _task[index].let {
+            it.copy(selected = !it.selected)
+        }
+
+    }
+
+
+    }
+
+
+
+
+
+
+
+
