@@ -38,7 +38,7 @@ class MainActivity : ComponentActivity() {
 
                     NavHost(
                         navController = navigationController,
-                        startDestination = Routes.TaskScreen.route
+                        startDestination = Routes.LoginScreen.route
                     ) {
                         composable(Routes.LoginScreen.route) { LoginScreen(loginViewModel = taskViewModel, navigationController) }
                         composable(Routes.RegisterScreen.route) { RegisterScreen(loginViewModel = taskViewModel, navigationController)}

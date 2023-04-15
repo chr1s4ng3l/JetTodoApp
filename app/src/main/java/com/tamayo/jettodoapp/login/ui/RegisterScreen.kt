@@ -1,5 +1,6 @@
 package com.tamayo.jettodoapp.login.ui
 
+import android.widget.Toast
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.*
@@ -11,6 +12,7 @@ import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
@@ -19,13 +21,14 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import com.tamayo.jettodoapp.navifation.Routes
+import kotlinx.coroutines.launch
 
 @Composable
 fun RegisterScreen(loginViewModel: LoginViewModel, navController: NavController) {
     val email: String by loginViewModel.email.observeAsState("")
-    val password: String by loginViewModel.email.observeAsState("")
-    val name: String by loginViewModel.email.observeAsState("")
-    val lastName: String by loginViewModel.email.observeAsState("")
+    val password: String by loginViewModel.password.observeAsState("")
+    val name: String by loginViewModel.name.observeAsState("")
+    val lastName: String by loginViewModel.lastName.observeAsState("")
     val isRegisterEnable: Boolean by loginViewModel.isEnable.observeAsState(initial = false)
 
 
@@ -48,8 +51,8 @@ fun RegisterScreen(loginViewModel: LoginViewModel, navController: NavController)
             loginViewModel.onRegisterChanged(
                 email = email,
                 password = password,
-                name = name,
-                lastName = it
+                name = it,
+                lastName = lastName
             )
         }
         Spacer(modifier = Modifier.size(8.dp))
@@ -92,7 +95,7 @@ fun RegisterScreen(loginViewModel: LoginViewModel, navController: NavController)
 
         RegisterEnable(
             registerEnable = isRegisterEnable,
-            navController = navController
+            navController = navController, loginViewModel, email, password
         )
 
 
@@ -107,7 +110,7 @@ fun Name(name: String, onTextChange: (String) -> Unit) {
         value = name,
         onValueChange = { onTextChange(it) },
         singleLine = true,
-        keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Email),
+        keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Text),
         label = { Text(text = "Name") },
         modifier = Modifier.fillMaxWidth(),
         colors = TextFieldDefaults.textFieldColors(
@@ -127,7 +130,7 @@ fun LastName(lastName: String, onTextChange: (String) -> Unit) {
         value = lastName,
         onValueChange = { onTextChange(it) },
         singleLine = true,
-        keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Email),
+        keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Text),
         label = { Text(text = "Last Name") },
         modifier = Modifier.fillMaxWidth(),
         colors = TextFieldDefaults.textFieldColors(
@@ -203,10 +206,21 @@ fun NewPassword(password: String, onTextChange: (String) -> Unit) {
 @Composable
 fun RegisterEnable(
     registerEnable: Boolean,
-    navController: NavController
+    navController: NavController, loginViewModel: LoginViewModel, email: String, password: String
 ) {
+
+    val context = LocalContext.current
+    val isLogin by loginViewModel.isLoggedIn.collectAsState()
     Button(
-        onClick = { navController.navigate(Routes.TaskScreen.route) },
+        onClick = {
+            loginViewModel.registerUser(email = email, password = password)
+            if(isLogin){
+                Toast.makeText(context, "User was saved successfully", Toast.LENGTH_SHORT).show()
+                navController.navigate(Routes.LoginScreen.route)
+            }else{
+                Toast.makeText(context, "Error occurred", Toast.LENGTH_SHORT).show()
+            }
+        },
         enabled = registerEnable,
         colors = ButtonDefaults.buttonColors(
             backgroundColor = Color(0xFF000000),

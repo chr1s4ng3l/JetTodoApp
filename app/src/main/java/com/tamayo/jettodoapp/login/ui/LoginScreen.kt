@@ -1,6 +1,7 @@
 package com.tamayo.jettodoapp.login.ui
 
 import android.app.Activity
+import android.widget.Toast
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -27,6 +28,7 @@ import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import com.tamayo.jettodoapp.R
 import com.tamayo.jettodoapp.navifation.Routes
+import kotlinx.coroutines.launch
 
 @Composable
 fun LoginScreen(loginViewModel: LoginViewModel, navController: NavController) {
@@ -111,7 +113,7 @@ fun Body(modifier: Modifier, loginViewModel: LoginViewModel, navController: NavC
         Spacer(modifier = Modifier.size(8.dp))
         ForgotPassword(Modifier.align(Alignment.End))
         Spacer(modifier = Modifier.size(16.dp))
-        LoginEnable(isLoginEnable, loginViewModel, navController)
+        LoginEnable(isLoginEnable, loginViewModel, navController, email, password)
         Spacer(modifier = Modifier.size(16.dp))
         LoginDivider()
         Spacer(modifier = Modifier.size(32.dp))
@@ -173,9 +175,20 @@ fun LoginDivider() {
 }
 
 @Composable
-fun LoginEnable(loginEnable: Boolean, loginViewModel: LoginViewModel, navController: NavController) {
+fun LoginEnable(loginEnable: Boolean, loginViewModel: LoginViewModel, navController: NavController, email: String, password: String) {
+
+val isLogin by loginViewModel.isLoggedIn.collectAsState()
+    val context = LocalContext.current
+
     Button(
-        onClick = { navController.navigate(Routes.TaskScreen.route) },
+        onClick = {
+            loginViewModel.loginUser(email, password)
+            if (isLogin){
+                navController.navigate(Routes.TaskScreen.route)
+            }else{
+                Toast.makeText(context, "User not found", Toast.LENGTH_SHORT).show()
+            }
+         },
         enabled = loginEnable,
         colors = ButtonDefaults.buttonColors(
             backgroundColor = Color(0xFF000000),
@@ -190,6 +203,7 @@ fun LoginEnable(loginEnable: Boolean, loginViewModel: LoginViewModel, navControl
     }
 
 }
+
 
 @Composable
 fun ForgotPassword(modifier: Modifier) {

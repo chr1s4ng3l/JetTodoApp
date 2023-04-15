@@ -115,7 +115,8 @@ fun ItemTask(taskModel: TaskModel, loginViewModel: LoginViewModel) {
             )
             Checkbox(
                 checked = taskModel.selected,
-                onCheckedChange = { loginViewModel.onCheckBox(taskModel) })
+                onCheckedChange = { loginViewModel.onCheckBox(taskModel) }, colors = CheckboxDefaults.colors(
+                    Color.Black))
 
         }
     }
@@ -154,7 +155,7 @@ fun AddTaskDialog(show: Boolean, onDismiss: () -> Unit, onTaskAdded: (String) ->
             ) {
 
                 Text(
-                    text = "Add Your Event",
+                    text = "Add Your Task",
                     fontSize = 24.sp,
                     fontWeight = FontWeight.Bold,
                     modifier = Modifier.padding(top = 16.dp)
@@ -162,7 +163,7 @@ fun AddTaskDialog(show: Boolean, onDismiss: () -> Unit, onTaskAdded: (String) ->
                 Spacer(modifier = Modifier.size(20.dp))
                 OutlinedTextField(value = textState, onValueChange = { textState = it }, label = {
                     Text(
-                        text = "Type your event here..."
+                        text = "Type your task here..."
                     )
                 }, singleLine = true, maxLines = 1)
                 Spacer(modifier = Modifier.size(8.dp))
@@ -179,7 +180,7 @@ fun AddTaskDialog(show: Boolean, onDismiss: () -> Unit, onTaskAdded: (String) ->
                         backgroundColor = Color.Black
                     )
                 ) {
-                    Text(text = "Add Event")
+                    Text(text = "Add Task")
                 }
 
             }

@@ -1,27 +1,30 @@
 package com.tamayo.jettodoapp.login.ui
 
 import android.util.Patterns
-import androidx.compose.runtime.mutableStateListOf
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.tamayo.jettodoapp.addtask.domain.AddTaskUseCase
 import com.tamayo.jettodoapp.addtask.domain.DeleteTaskUseCase
-import com.tamayo.jettodoapp.login.domain.LoginUseCase
 import com.tamayo.jettodoapp.addtask.domain.GetTaskUseCase
 import com.tamayo.jettodoapp.addtask.domain.UpdateTaskUseCase
 import com.tamayo.jettodoapp.addtask.ui.TaskUiState
 import com.tamayo.jettodoapp.addtask.ui.TaskUiState.Success
 import com.tamayo.jettodoapp.addtask.ui.model.TaskModel
+import com.tamayo.jettodoapp.login.data.LoginRepository
+import com.tamayo.jettodoapp.login.utils.SingInState
+import com.tamayo.jettodoapp.login.utils.SingUpState
+import com.tamayo.jettodoapp.login.utils.UIState
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 @HiltViewModel
 class LoginViewModel @Inject constructor(
-    private val loginUseCase: LoginUseCase,
+    private val loginRepository: LoginRepository,
     private val addTaskUseCase: AddTaskUseCase,
     private val deleteTaskUseCase: DeleteTaskUseCase,
     private val updateTaskUseCase: UpdateTaskUseCase,
@@ -31,6 +34,11 @@ class LoginViewModel @Inject constructor(
     val uiState: StateFlow<TaskUiState> = getTaskUseCase().map(::Success)
         .catch { TaskUiState.Error(it) }
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), TaskUiState.Loading)
+
+
+    private val _isLoggedIn = MutableStateFlow(loginRepository.isLoggedIn())
+    val isLoggedIn: StateFlow<Boolean> = _isLoggedIn
+
 
     private val _name = MutableLiveData<String>()
     val name: LiveData<String> = _name
@@ -75,17 +83,15 @@ class LoginViewModel @Inject constructor(
             .matches() && password.length > 6 && name.isNotEmpty() && lastName.isNotEmpty()
 
 
-    fun unLoginSelected() {
-        viewModelScope.launch {
-            isLoading.value = true
-            val result = loginUseCase(email.value!!, password.value!!)
-            if (result) {
-                //Navigation
-                println("Christopher")
-                isLoading.value = false
-            }
-        }
-    }
+    fun loginUser(email: String, password: String) =
+        loginRepository.loginUser(email, password)
+            .addOnSuccessListener { _isLoggedIn.value = true }
+            .addOnFailureListener { println("Error user not found") }
+
+    fun registerUser(email: String, password: String)   =
+        loginRepository.registerUser(email, password)
+            .addOnSuccessListener { _isLoggedIn.value = true }
+            .addOnFailureListener {  println("Error user not registered") }
 
     fun dialogClose() {
         showDialog.value = false
