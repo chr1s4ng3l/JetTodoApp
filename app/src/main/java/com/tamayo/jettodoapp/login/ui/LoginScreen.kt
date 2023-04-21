@@ -177,17 +177,20 @@ fun LoginDivider() {
 @Composable
 fun LoginEnable(loginEnable: Boolean, loginViewModel: LoginViewModel, navController: NavController, email: String, password: String) {
 
-val isLogin by loginViewModel.isLoggedIn.collectAsState()
     val context = LocalContext.current
+    val isLogin by loginViewModel.isLoggedIn.observeAsState(false)
 
     Button(
         onClick = {
             loginViewModel.loginUser(email, password)
-            if (isLogin){
-                navController.navigate(Routes.TaskScreen.route)
-            }else{
-                Toast.makeText(context, "User not found", Toast.LENGTH_SHORT).show()
-            }
+                  if (isLogin){
+
+                      Toast.makeText(context, "User found", Toast.LENGTH_SHORT).show()
+                      navController.navigate(Routes.TaskScreen.route)
+                  }else{
+                      Toast.makeText(context, "User not found", Toast.LENGTH_SHORT).show()
+
+                  }
          },
         enabled = loginEnable,
         colors = ButtonDefaults.buttonColors(

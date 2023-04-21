@@ -144,6 +144,8 @@ fun AddTaskDialog(show: Boolean, onDismiss: () -> Unit, onTaskAdded: (String) ->
     var textState by remember {
         mutableStateOf("")
     }
+    val isTaskEnable = textState.isNotEmpty()
+
 
     if (show) {
         Dialog(onDismissRequest = { onDismiss() }) {
@@ -178,7 +180,7 @@ fun AddTaskDialog(show: Boolean, onDismiss: () -> Unit, onTaskAdded: (String) ->
                     colors = ButtonDefaults.buttonColors(
                         contentColor = Color.White,
                         backgroundColor = Color.Black
-                    )
+                    ), enabled = isTaskEnable
                 ) {
                     Text(text = "Add Task")
                 }

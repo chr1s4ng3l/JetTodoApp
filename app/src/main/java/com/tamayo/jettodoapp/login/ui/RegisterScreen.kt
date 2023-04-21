@@ -210,7 +210,7 @@ fun RegisterEnable(
 ) {
 
     val context = LocalContext.current
-    val isLogin by loginViewModel.isLoggedIn.collectAsState()
+    val isLogin by loginViewModel.isRegisterIn.collectAsState()
     Button(
         onClick = {
             loginViewModel.registerUser(email = email, password = password)

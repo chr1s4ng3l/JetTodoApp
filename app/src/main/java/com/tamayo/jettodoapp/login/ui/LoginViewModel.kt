@@ -36,8 +36,12 @@ class LoginViewModel @Inject constructor(
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), TaskUiState.Loading)
 
 
-    private val _isLoggedIn = MutableStateFlow(loginRepository.isLoggedIn())
-    val isLoggedIn: StateFlow<Boolean> = _isLoggedIn
+    private val _isLoggedIn = MutableLiveData<Boolean>()
+    val isLoggedIn: LiveData<Boolean> = _isLoggedIn
+
+
+    private val _isRegisterIn = MutableStateFlow(loginRepository.isLoggedIn())
+    val isRegisterIn: StateFlow<Boolean> = _isRegisterIn
 
 
     private val _name = MutableLiveData<String>()
@@ -56,11 +60,15 @@ class LoginViewModel @Inject constructor(
     val showDialog = MutableLiveData<Boolean>()
     val isLoading = MutableLiveData<Boolean>()
 
+    fun isLoginValid(email: String, password: String): Boolean =
+        loginRepository.isEmailAndPasswordValid(email, password)
+
     fun onLoginChanged(email: String, password: String) {
         _email.value = email
         _password.value = password
         isEnable.value = enableLogin(email, password)
     }
+
 
     fun onRegisterChanged(name: String, lastName: String, email: String, password: String) {
         _email.value = email
@@ -86,12 +94,12 @@ class LoginViewModel @Inject constructor(
     fun loginUser(email: String, password: String) =
         loginRepository.loginUser(email, password)
             .addOnSuccessListener { _isLoggedIn.value = true }
-            .addOnFailureListener { println("Error user not found") }
+            .addOnFailureListener { }
 
-    fun registerUser(email: String, password: String)   =
+    fun registerUser(email: String, password: String) =
         loginRepository.registerUser(email, password)
-            .addOnSuccessListener { _isLoggedIn.value = true }
-            .addOnFailureListener {  println("Error user not registered") }
+            .addOnSuccessListener { _isRegisterIn.value = true }
+            .addOnFailureListener { println("Error user not registered") }
 
     fun dialogClose() {
         showDialog.value = false
